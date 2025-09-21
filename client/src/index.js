@@ -18,6 +18,9 @@ const router = createBrowserRouter([
     path: "/form",
     element: <PortfolioForm />
   }, {
+    path: "/form/:contactId",
+    element: <PortfolioForm />
+  }, {
     path: "/summary",
     element: <PortfolioSummary />
   }
