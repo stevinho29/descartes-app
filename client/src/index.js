@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+
 import WelcomePage from './welcome_page';
 import PortfolioForm from './portfolio_form';
 import PortfolioSummary from './portfolio_summary';
