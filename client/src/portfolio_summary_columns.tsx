@@ -34,6 +34,7 @@ export function getPortfolioSummaryColumns({onJobClickHandler, onJobDeleteHandle
           enableSorting: true,
           cell: ({ row }) => {
             return <div 
+            data-testid={`job-id-${row.original.id}`}
             className="font-bold cursor-pointer"
             onClick={()=>onJobClickHandler(row.original.job)}>{row.original.job}
             </div>;

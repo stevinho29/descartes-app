@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom'
 import './portfolio_form.css';
-import z, { minLength } from 'zod';
+import z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormItem, FormLabel, FormControl, FormMessage, FormField } from "./components/ui/form"
 import { Input } from "./components/ui/input"
