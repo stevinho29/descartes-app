@@ -79,7 +79,6 @@
       "text"
     ],
     "snapshotSerializers": [
-      "my-serializer-module"
     ]
   }
 }

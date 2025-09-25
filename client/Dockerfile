@@ -2,9 +2,7 @@ FROM node:20-alpine as builder
 
 WORKDIR /app
 
-COPY package*.json /app
-COPY src /app/src
-COPY public /app/public
+COPY ./ /app
 
 RUN npm install --legacy-peer-deps
 
