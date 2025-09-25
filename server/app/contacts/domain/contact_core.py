@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ContactCore:
 
-    ORDERABLE_FIELDS = ["first_name", "last_name", "job", "email"]
+    ORDERABLE_FIELDS = ["first_name", "last_name", "job", "email", "comment"]
 
     def __init__(self, db:Database) -> None:
         self.contact_db = db
@@ -35,11 +35,11 @@ class ContactCore:
     def get_contacts(self, params:FilterQuery):
         log_header = f"{self.log_header}[get_contacts]"
         _filter = DatabaseFilter()
-        contact = {}
+        _filter.select = {}
         if params.email:
-            contact["email"] = params.email
-        _filter.select = contact
-
+             _filter.select["email"] = params.email
+        if params.job:
+            _filter.select["job"] = params.job
         total = self.contact_db.get_record_counts(_filter)
 
         if total == 0:
@@ -48,13 +48,15 @@ class ContactCore:
         order_by = self._get_order_by(params.sort, params.desc)
         _filter.order_by = order_by
 
-        offset, limit = params.range.split("-")
+        if params.only:
+            _filter.only = params.only
+        offset, limit = params.offset_limit
         _filter.limit = limit
         _filter.offset = offset
 
         contact = self.contact_db.get_record_by_filter(_filter)
         logger.info(f"{log_header} contact with id {id} retrieved with success")
-        return contact
+        return total, contact
 
     def create_contact(self, data:Contact):
         log_header = f"{self.log_header}[create_contact]"

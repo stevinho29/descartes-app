@@ -7,7 +7,8 @@ class DatabaseFilter(BaseModel):
     offset: int | None = None
     limit: int | None = None
     order_by: list[str] | None = None
-
+    only: list[str] | None = None
+    
 class Database:
 
     def get_record_by_id(self, id:int) -> BaseModel:

@@ -1,19 +1,19 @@
 from typing import Annotated
+import logging
 
-from fastapi.exceptions import RequestValidationError
-
+from pydantic import BaseModel
 
 from app.contacts.domain.contact_core import ContactCore
-from app.contacts.domain.entities import CustomResponse, FilterQuery
+from app.contacts.domain.entities import ContactCreate, ContactUpdate, MutipleResponse, FilterQuery, UniqueResponse
 from app.settings import CONF
 from sqlmodel import Session, create_engine
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query
 from app.contacts.adapters.contact_database import (
-    Contact,
-    ContactCreate,
     ContactDatabase,
-    ContactUpdate,
+
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -48,46 +48,38 @@ def get_current_page(total: int, start: int, end: int):
 CoreDep = Annotated[ContactCore, Depends(get_core)]
 
 
-
-@router.post("/contacts", response_model=Contact)
-def create_contact(contact: ContactCreate, core: CoreDep):
+@router.post("/contacts", response_model=UniqueResponse)
+def create_contact( core: CoreDep, contact:ContactCreate):
     new_contact = core.create_contact(contact)
-    return new_contact
+    return UniqueResponse(data=new_contact.model_dump())
 
 
-@router.get("/contacts", response_model=list[Contact])
+@router.get("/contacts", response_model=MutipleResponse)
 def get_contacts(core: CoreDep, filter_query: Annotated[FilterQuery, Query()]):
-    if not all([field in ContactCore.ORDERABLE_FIELDS for field in filter_query.sort]):
-        raise RequestValidationError(400, "Invalid sort field")
-    if not all([field in ContactCore.ORDERABLE_FIELDS for field in filter_query.sort]):
-        raise RequestValidationError(400, "Invalid desc field")
 
-    range = filter_query.range
-    try:
-        offset, limit = [map(int, range.split("-"))]
-    except ValueError:
-        raise
+    offset, limit = filter_query.offset_limit
     total, data = core.get_contacts(filter_query)
     current_page = get_current_page(total=total, start=offset, end=limit)
-    response = CustomResponse(total=total, data=data, current=current_page)
-    return response
+    data_serialized = [c.model_dump() if isinstance(c, BaseModel) else c for c in data]
+
+    return MutipleResponse(total=total, data=data_serialized, current=current_page)
 
 
-@router.get("/contacts/{contact_id}", response_model=Contact)
-def read_hero(contact_id: int, core: CoreDep):
+@router.get("/contacts/{contact_id}", response_model=UniqueResponse)
+def get_contact(contact_id: int, core: CoreDep):
     contact = core.get_contact(contact_id)
-    return contact
+    return UniqueResponse(data=contact.model_dump())
 
 
-@router.patch("/contacts/{contact_id}", response_model=Contact)
-def update_hero(contact_id: int, contact: ContactUpdate, core: CoreDep):
+@router.put("/contacts/{contact_id}", response_model=UniqueResponse)
+def update_contact(contact_id: int, contact: ContactUpdate, core: CoreDep):
     contact.id = contact_id
     updated_contact = core.update_contact(contact)
 
-    return updated_contact
+    return UniqueResponse(data=updated_contact.model_dump())
 
 
 @router.delete("/contacts/{contact_id}")
-def delete_hero(contact_id: int, core: CoreDep):
+def delete_contact(contact_id: int, core: CoreDep):
     core.delete_contact(contact_id)
     return {"msg": "Contact deleted with success"}

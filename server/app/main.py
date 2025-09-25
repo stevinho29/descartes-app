@@ -1,7 +1,8 @@
 
 
-
+import logging
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -11,6 +12,9 @@ from app.routers import contacts
 from app.settings import CONF
 from app.contacts.domain.exceptions import ContactNotFound, EmailAddressNotUnique
 
+logger = logging.getLogger(__name__)
+
+
 postgre_url = f"postgresql+psycopg2://{CONF.DB_USER}:{CONF.DB_PASSWORD}@{CONF.DB_HOST}:{CONF.DB_PORT}/{CONF.DB_NAME}"
 
 connect_args = {"check_same_thread": False}
@@ -19,8 +23,23 @@ engine = create_engine(postgre_url, echo=True)
 app = FastAPI()
 app.include_router(contacts.router)
 
+
+
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
+    if not SQLModel.metadata.tables:
+        SQLModel.metadata.create_all(engine)
 
 
 
@@ -66,5 +85,3 @@ def on_startup():
 @app.get("/")
 async def root():
     return {"message": "Hello Bigger Applications!"}
-
-
