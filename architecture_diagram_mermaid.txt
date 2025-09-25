@@ -1,0 +1,15 @@
+flowchart TD
+
+  subgraph Client [Frontend – React SPA]
+    A[Browser UI] -->|REST| B[/FastAPI API/]
+  end
+
+  subgraph Server [Backend – FastAPI]
+    B --> C[Core: Service]
+    C --> D[Port: Database Interface]
+    D --> E[Adapter: ContactDatabase]
+  end
+
+  subgraph DB [Persistence]
+    E --> F[(PostgreSQL)]
+  end
