@@ -48,7 +48,7 @@ async def internal_error_exception_handler(
     request: Request, exc: RequestValidationError
 ):
     return JSONResponse(
-        status_code=422,
+        status_code=500,
         content=jsonable_encoder(
             {"errors": [{"error": "Internal-error", "message": str(exc)}]}
         ),
@@ -58,7 +58,7 @@ async def internal_error_exception_handler(
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
-        status_code=422,
+        status_code=400,
         content=jsonable_encoder({"errors": exc.errors()}),
     )
 
@@ -66,7 +66,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.exception_handler(EmailAddressNotUnique)
 async def conflict_exception_handler(request: Request, exc: EmailAddressNotUnique):
     return JSONResponse(
-        status_code=418,
+        status_code=409,
         content={"errors": [{"error": "Conflict-error", "message": str(exc)}]},
     )
 
