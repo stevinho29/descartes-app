@@ -81,3 +81,11 @@ export async function callIgnore404(url: string | URL, requestInit: RequestInit)
     if (params) return new URL(url) + `?${new URLSearchParams(params).toString()}`;
     return new URL(url);
   }
+
+  export function getHeaders(
+    content_type: "application/json" | "multipart/form-data" | null,
+  ): Headers {
+    let headers = new Headers();
+    if (content_type) headers.set("Content-Type", content_type);
+    return headers;
+  }

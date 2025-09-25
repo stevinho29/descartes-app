@@ -1,8 +1,14 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ContactModel } from "./models/contact";
+import { Edit2, Trash } from "lucide-react";
+import { Button } from "./components/ui/button";
 
-
-export function getPortfolioSummaryColumns(onJobClickHandler: (value:string)=>void){
+interface ColumnsProps{
+  onJobClickHandler: (value:string)=>void
+  onJobDeleteHandler : (value:number)=>void
+  onEditJobHandler: (value:number)=>void
+}
+export function getPortfolioSummaryColumns({onJobClickHandler, onJobDeleteHandler, onEditJobHandler}: ColumnsProps){
     const portfolioColumns: ColumnDef<ContactModel>[] = [
         {
           accessorKey: "first_name",
@@ -20,7 +26,7 @@ export function getPortfolioSummaryColumns(onJobClickHandler: (value:string)=>vo
         {
             accessorKey: "email",
             header: "Email",
-            enableSorting: false
+            enableSorting: true
         },
         {
           accessorKey: "job",
@@ -28,7 +34,7 @@ export function getPortfolioSummaryColumns(onJobClickHandler: (value:string)=>vo
           enableSorting: true,
           cell: ({ row }) => {
             return <div 
-            className="font-bold"
+            className="font-bold cursor-pointer"
             onClick={()=>onJobClickHandler(row.original.job)}>{row.original.job}
             </div>;
           },
@@ -36,10 +42,31 @@ export function getPortfolioSummaryColumns(onJobClickHandler: (value:string)=>vo
         {
           accessorKey: "comment",
           header: "Comment",
+          enableSorting: false,
           cell: ({ row }) => {
             return <div>{row.original.comment}</div>;
           },
+        },
+        {
+          id: "actions",
+          header: "Actions",
+          cell: ({ row }) => {
+            const contact = row.original;
+            return (
+              <div>
+                <Button onClick={() => {
+                  onJobDeleteHandler(contact.id)}}>
+                <Trash className="text-red-500"></Trash>
+                </Button>
+                <Button onClick={() => {
+                  onEditJobHandler(contact.id)}}>
+                <Edit2 className="text-blue-500"></Edit2>
+                </Button>
+                </div>
+            )
         }
-      ];
+      }
+    ]
+      
       return portfolioColumns
 }

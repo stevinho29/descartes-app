@@ -35,7 +35,7 @@ export function getRange(pageIndex: number, pageSize: number) {
 }
 
 export function getSortAndDesc(SortingState: SortingState){
-    console.log(SortingState)
+
     let sort = []
     let desc = []
     for (let column of SortingState){
