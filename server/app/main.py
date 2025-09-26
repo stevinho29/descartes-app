@@ -1,5 +1,6 @@
 
 
+from contextlib import asynccontextmanager
 import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,9 +21,15 @@ postgre_url = f"postgresql+psycopg2://{CONF.DB_USER}:{CONF.DB_PASSWORD}@{CONF.DB
 connect_args = {"check_same_thread": False}
 engine = create_engine(postgre_url, echo=True)
 
-app = FastAPI()
-app.include_router(contacts.router)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
+    
+app = FastAPI(lifespan=lifespan)
+app.include_router(contacts.router)
 
 
 origins = [
@@ -38,8 +45,7 @@ app.add_middleware(
 )
 
 def create_db_and_tables():
-    if not SQLModel.metadata.tables:
-        SQLModel.metadata.create_all(engine)
+    SQLModel.metadata.create_all(engine)
 
 
 
@@ -77,10 +83,6 @@ async def not_found_exception_handler(request: Request, exc: ContactNotFound):
         status_code=404,
         content={"errors": [{"error": "Not-found", "message": str(exc)}]},
     )
-
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
 
 @app.get("/")
 async def root():
